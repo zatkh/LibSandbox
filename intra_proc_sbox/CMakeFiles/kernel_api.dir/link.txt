@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC  -fPIC -g -shared -Wl,-soname,libkernel_api.so -o libkernel_api.so CMakeFiles/kernel_api.dir/kernel_api.c.o 

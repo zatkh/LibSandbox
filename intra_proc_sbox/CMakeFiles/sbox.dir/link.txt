@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC  -fPIC -g -shared -Wl,-soname,libsbox.so -o libsbox.so CMakeFiles/sbox.dir/tpt.c.o CMakeFiles/sbox.dir/mdom.c.o CMakeFiles/sbox.dir/kernel_api.c.o  -Wl,-rpath,/home/zt/Documents/git/LibSandbox/API libtpt.so libmdom.so libkernel_api.so -lpthread 
