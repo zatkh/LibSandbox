@@ -22,12 +22,12 @@
 
 // can allocate specific tpt for privae stack
 //#define THREAD_PRIVATE_STACK
-#define NEW_SMV -1
+
 
 // Note: DONT intercept pthread for Firefox
 //#define INTERCEPT_PTHREAD_CREATE
 //#ifdef INTERCEPT_PTHREAD_CREATE
-//#define pthread_create(tid, attr, fn, args) sthread_create(NEW_SMV, tid, fn, args)
+//#define pthread_create(tid, attr, fn, args) sthread_create(-1, tid, fn, args)
 //#endif
 
 extern int ALLOW_GLOBAL; // 1: all threads can access global memdom, 0 otherwise
@@ -58,7 +58,7 @@ int detach_tpt_from_mdom(int mdom_id, int tpt_id);
 int is_tpt_attached(int mdom_id, int tpt_id);
 
 // Create an sthread with dedicated tpt 
-//int sthread_create(int tpt_id, pthread_t *tid, void *(fn)(void*), void *args);
+int sthread_create(int tpt_id, pthread_t *tid, void *(fn)(void*), void *args);
 
 
 

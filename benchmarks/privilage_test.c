@@ -9,7 +9,6 @@
 pthread_mutex_t mlock;
 
 
-// Thread stack for creating smvs
 void *fn(void *args){
     int i = 0;
     int tpt_id[PER_THREAD_TPTS];
@@ -33,16 +32,16 @@ int main()
     int i = 0;
     int *mdom_alloc[1024];
 
-tpt_init(1);
+    tpt_init(1);
 
-tpt_id[0] = tpt_create();
-tpt_id[1] = tpt_create();
-mdom_id=memdom_create();
-printf("tpt created: %d, tpt created: %d, mdom_id: %d\n",tpt_id[0],tpt_id[1],mdom_id);
+    tpt_id[0] = tpt_create();
+    tpt_id[1] = tpt_create();
+    mdom_id=memdom_create();
+    printf("tpt created: %d, tpt created: %d, mdom_id: %d\n",tpt_id[0],tpt_id[1],mdom_id);
 
 
-attach_tpt_to_mdom(mdom_id, 0);
-memdom_priv_add(mdom_id, 0, MEMDOM_READ | MEMDOM_WRITE);
+    attach_tpt_to_mdom(mdom_id, 0);
+    memdom_priv_add(mdom_id, 0, MEMDOM_READ | MEMDOM_WRITE);
 
 
 
@@ -66,81 +65,13 @@ memdom_priv_add(mdom_id, 0, MEMDOM_READ | MEMDOM_WRITE);
     printf("\n");
 
 
-detach_tpt_from_mdom(mdom_id, 0);
+    detach_tpt_from_mdom(mdom_id, 0);
+    memdom_kill(mdom_id);
 
+    tpt_remove(tpt_id[0]);
+    tpt_remove(tpt_id[1]);
 
-memdom_kill(mdom_id);
+    printf("test\n");
 
-tpt_remove(tpt_id[0]);
-tpt_remove(tpt_id[1]);
-
-printf("test\n");
-
-
-    // main thread create smvs
- /*   for (i = 0; i < PER_THREAD_TPTS; i++) {
-        tpt_id[i] = tpt_create();
-    }
-
-    for (i = 0; i < NUM_THREADS; i++) {
-        pthread_create(&tid[i], NULL, fn, NULL);
-    }
-   
-    attach_tpt_to_mdom(mdom_id, tpt_id[0]);
-    if (is_tpt_attached(mdom_id, tpt_id[0])) {
-        printf("tpt %d attached to mdom %d\n", tpt_id[0], mdom_id);        
-    }
-
-
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_READ);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_WRITE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_EXECUTE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_ALLOCATE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-
-    memdom_priv_del(mdom_id, tpt_id[0], MEMDOM_EXECUTE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-    
-    memdom_priv_del(mdom_id, tpt_id[0], MEMDOM_WRITE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-
-    memdom_priv_del(mdom_id, tpt_id[0], MEMDOM_READ);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-
-    memdom_priv_del(mdom_id, tpt_id[0], MEMDOM_ALLOCATE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
-
-    smv_leave_domain(mdom_id, tpt_id[0]);
-
-    // wait for child threads
-    for (i = 0; i < NUM_THREADS; i++) {
-        pthread_join(tid[i], NULL);
-    }
-
-    for (i = 0; i < PER_THREAD_TPTS; i++) {
-        if (tpt_id[i] != -1) {
-            tpt_remove(tpt_id[i]);
-        }
-    }
-
-    // Try delete a non-existing smv/memdom
-    tpt_remove(12345);
-    memdom_kill(48);
-
-    */
     return 0;
 }

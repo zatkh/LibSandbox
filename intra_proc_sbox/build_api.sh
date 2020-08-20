@@ -5,7 +5,9 @@ export INCDIR=/usr/include
 
 # compile userspace API library
 echo "------------------------------------- Compiling user space library -------------------------------------"
-cmake .
+mkdir -p out
+cd out
+cmake ../
 make clean
 make
 
