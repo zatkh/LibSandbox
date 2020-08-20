@@ -14,6 +14,16 @@
 #include <linux/genetlink.h>
 #include "kernel_api.h"
 #include "tpt.h"
+#include "nlink.h"
+
+
+int fd;
+struct iovec iov;
+struct nlmsghdr *nlh = NULL;
+struct sockaddr_nl src_addr;
+struct msghdr msg;
+struct sockaddr_nl dest_addr;
+ int ret=0;
 
 #define GENLMSG_DATA(glh) ((void *)(NLMSG_DATA(glh) + GENL_HDRLEN))
 #define GENLMSG_PAYLOAD(glh) (NLMSG_PAYLOAD(glh, 0) - GENL_HDRLEN)
@@ -126,7 +136,7 @@ int send_to_kernel(int netlink_socket, const char *message, int length){
     return 0;
 }
 
-int message_to_kernel(char* message){
+int __message_to_kernel(char* message){
 
     int nl_sd = create_netlink_socket(0);
     if(nl_sd < 0){
@@ -199,3 +209,53 @@ int message_to_kernel(char* message){
     close(nl_sd);    
     return(atoi(result));
 }
+
+
+
+int message_to_kernel(char* message) {
+
+ fd = socket(PF_NETLINK, SOCK_RAW,NETLINK_USER);
+
+ memset(&src_addr, 0, sizeof(src_addr));
+ src_addr.nl_family = AF_NETLINK;
+ src_addr.nl_pid = getpid(); 
+ src_addr.nl_groups = 0;  
+ bind(fd, (struct sockaddr*)&src_addr,
+      sizeof(src_addr));
+
+ memset(&dest_addr, 0, sizeof(dest_addr));
+ dest_addr.nl_family = AF_NETLINK;
+ dest_addr.nl_pid = 0;   
+ dest_addr.nl_groups = 0; 
+
+ nlh=(struct nlmsghdr *)malloc(
+		         NLMSG_SPACE(MAX_PAYLOAD));
+
+ nlh->nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
+ nlh->nlmsg_pid = getpid(); 
+ nlh->nlmsg_flags = 0;
+
+ strncpy(NLMSG_DATA(nlh), message,strlen(message));
+
+ iov.iov_base = (void *)nlh;
+ iov.iov_len = nlh->nlmsg_len;
+ msg.msg_name = (void *)&dest_addr;
+ msg.msg_namelen = sizeof(dest_addr);
+ msg.msg_iov = &iov;
+ msg.msg_iovlen = 1;
+
+ sendmsg(fd, &msg, 0);
+
+ memset(nlh, 0, NLMSG_SPACE(MAX_PAYLOAD));
+ recvmsg(fd, &msg, 0);
+ //printf(" Received message payload: %s\n",NLMSG_DATA(nlh));
+
+ ret=(atoi((char*)NLMSG_DATA(nlh)));
+ // printf("ret test:%d\n",ret);
+
+ close(fd);
+ return ret;
+}
+
+
+

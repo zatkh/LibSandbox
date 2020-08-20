@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -g -Wall 
 SBOX_DIR = $(PWD)/../intra_proc_sbox/
-LIBS = -L$(SBOX_DIR) -lsbox -lpthread
+LIBS = -L$(SBOX_DIR)/out -lsbox -lpthread
 CFLAGS += -I$(SBOX_DIR)
 OBJ_FILES = privilage_test
 
