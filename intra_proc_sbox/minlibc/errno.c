@@ -1,1 +1,0 @@
-long errno = 0;
