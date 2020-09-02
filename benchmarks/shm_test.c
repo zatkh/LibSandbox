@@ -35,7 +35,7 @@ int main(){
     pthread_t tid[NUM_THREADS];
     int *t[NUM_THREADS];
     glob = 0;
-    block_write = 3; // don't allow this tpt to write to global
+    block_write = 13; // don't allow this tpt to write to global
 
     tpt_init(1);
     
@@ -62,6 +62,7 @@ int main(){
         }
     }
 
+
     for (i = 0; i < NUM_THREADS; i++) {
         t[i] = malloc(sizeof(int));
         *t[i] = i;
@@ -76,6 +77,7 @@ int main(){
         pthread_join(tid[i], NULL);
         printf("waited thread %d\n", i);
     }
+
 
 
     for (i = 0; i < NUM_THREADS; i++) {

@@ -84,9 +84,27 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    #ifdef COPROC_ENABLED
+#ifdef COPROC_ENABLED
+     tpt_init(1);
     elf_mdom=memdom_create();
-    #endif
+    int tpt_id=tpt_create();
+
+
+    printf("mdom created for loader: %d, tpt created: %d, mdom_id: %d\n",elf_mdom,tpt_id);
+
+    attach_tpt_to_mdom(elf_mdom, tpt_id);
+     attach_tpt_to_mdom(elf_mdom, 0);
+    if (is_tpt_attached(elf_mdom, tpt_id)) {
+        printf("smv %d joined memdom %d\n", tpt_id, elf_mdom);        
+    }
+
+    memdom_priv_add(elf_mdom, tpt_id, MEMDOM_READ| MEMDOM_WRITE| MEMDOM_EXECUTE | MEMDOM_ALLOCATE);
+        memdom_priv_add(elf_mdom, 0, MEMDOM_READ| MEMDOM_WRITE| MEMDOM_EXECUTE | MEMDOM_ALLOCATE);
+
+   int  privs = memdom_priv_get(elf_mdom, tpt_id);
+    printf("smv %d privs %x memdom %d\n", tpt_id, privs, elf_mdom);
+
+#endif
 
     fname = argv[1];
     bname = filename_from_path(fname);

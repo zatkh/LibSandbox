@@ -924,7 +924,7 @@ static bool elf_link(struct elf_module *m)
     m->flags |= FLAG_LINKED;
     ret = true;
 out:
-    free(needed);
+    memdom_free(needed);
     LOG_DEBUG("[ finished linking %s, ret=%d ]", m->name, ret);
     return ret;
 }

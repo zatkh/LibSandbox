@@ -15,7 +15,7 @@
 #define MEMDOM_ALLOCATE         0x00000008
 
 /* MMAP flag for memdom protected area */
-#define MAP_MEMDOM	0x00800000	
+#define MAP_MEMDOM	0x08000000	
 
 /* Maximum heap size a memdom can use: 1GB */
 //#define MEMDOM_HEAP_SIZE 0x40000000

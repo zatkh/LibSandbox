@@ -1,14 +1,23 @@
+ #define _GNU_SOURCE             /* See feature_test_macros(7) */
+   #include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <sched.h>
 #include <tpt.h>
 #include <mdom.h>
 #include <pthread.h>
+#include <sys/wait.h>
+#include <sys/utsname.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/mman.h>
+
 #define NUM_THREADS 1
 #define PER_THREAD_TPTS 10
 #define NUM_MEMDOMS_PER_THREAD 10
 
-pthread_mutex_t mlock;
+//pthread_mutex_t mlock;
 
 
 void *fn(void *args){
@@ -151,7 +160,20 @@ int pthread_test(){
     return 0;
 }
 
-int main(){
+void *fn3(void *args){
+    int i = 0;
+    int j[1024];
+    for (i = 0; i < 1024; i++) {
+        j[i] = i;
+        if (i % 1000 == 0) {
+            printf("j[%d] = %d\n", i, j[i]);
+        }
+    }
+    return NULL;
+}
+
+
+int __main(){
     int i = 0;
     int memdom_id;
     int tpt_id;
@@ -170,12 +192,13 @@ int main(){
     memdom_priv_add(0, tpt_id, MEMDOM_READ | MEMDOM_WRITE);
 
 
-    rv = sthread_create(tpt_id, &tid,fn2, NULL);
+    rv = sthread_create(tpt_id, &tid,fn3, NULL);
     if (rv == -1) {
             printf("sthread_create error\n");
         }
 
- /* Add privilege and delete them in serve order */
+
+
      attach_tpt_to_mdom(memdom_id, tpt_id);
 
     memdom_priv_add(memdom_id, tpt_id, MEMDOM_READ);
@@ -188,16 +211,54 @@ int main(){
     }
 
 
-   // pthread_join(tid, NULL);
+    pthread_join(tid, NULL);
 
 
-getchar();
 //tpt_remove(tpt_id);
 
     
 
     // Try delete a non-existing memdom
-    //memdom_kill(12345);
+    memdom_kill(12345);
     return 0;
+}
+
+static int child_func(void* arg) {
+  char* buf = (char*)arg;
+  printf("Child sees buf = \"%s\"\n", buf);
+  strcpy(buf, "hello from child");
+  return 0;
+}
+
+int main(int argc, char** argv) {
+  // Allocate stack for child task.
+  const int STACK_SIZE = 65536;
+  char* stack = malloc(STACK_SIZE);
+  if (!stack) {
+    perror("malloc");
+    exit(1);
+  }
+
+  // When called with the command-line argument "vm", set the CLONE_VM flag on.
+  unsigned long flags = 0;
+  if (argc > 1 && !strcmp(argv[1], "vm")) {
+    flags |= CLONE_VM;
+  }
+
+  char buf[100];
+  strcpy(buf, "hello from parent");
+  if (clone(child_func, stack + STACK_SIZE, flags | SIGCHLD, buf) == -1) {
+    perror("clone");
+    exit(1);
+  }
+
+  int status;
+  if (wait(&status) == -1) {
+    perror("wait");
+    exit(1);
+  }
+
+  printf("Child exited with status %d. buf = \"%s\"\n", status, buf);
+  return 0;
 }
 
