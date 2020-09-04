@@ -1,0 +1,3 @@
+[submodule "benchmarks/apps/zlib"]
+	path = benchmarks/apps/zlib
+	url = https://github.com/madler/zlib.git
