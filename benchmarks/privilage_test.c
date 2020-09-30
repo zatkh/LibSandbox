@@ -22,13 +22,13 @@
 
 void *fn(void *args){
     int i = 0;
-    int tpt_id[PER_THREAD_TPTS];
+    int mem_view_id[PER_THREAD_TPTS];
     for (i = 0; i < PER_THREAD_TPTS; i++) {
-        tpt_id[i] = tpt_create();
+        mem_view_id[i] = mem_view_create();
     }
     for (i = 0; i < PER_THREAD_TPTS; i++) {
-        if (tpt_id[i] != -1) {
-            tpt_remove(tpt_id[i]);
+        if (mem_view_id[i] != -1) {
+            mem_view_remove(mem_view_id[i]);
         }
     }
     return NULL;
@@ -53,44 +53,44 @@ void *fn2(void *args){
 
 int priv_test()
 {
-    int tpt_id[PER_THREAD_TPTS];
+    int mem_view_id[PER_THREAD_TPTS];
     pthread_t tid[NUM_THREADS];
     int mdom_id;
     int privs = 0;
     int i = 0;
     int *mdom_alloc[1024];
 
-//    tpt_init(0);
+//    mem_view_init(0);
 
     mdom_id=memdom_create();
 
     for (i = 0; i < PER_THREAD_TPTS; i++) {
-        tpt_id[i] =tpt_create();
+        mem_view_id[i] =mem_view_create();
     }
 
 
-    printf("tpt created: %d, tpt created: %d, mdom_id: %d\n",tpt_id[0],tpt_id[1],mdom_id);
+    printf("tpt created: %d, tpt created: %d, mdom_id: %d\n",mem_view_id[0],mem_view_id[1],mdom_id);
 
-  attach_tpt_to_mdom(mdom_id, tpt_id[0]);
-    if (is_tpt_attached(mdom_id, tpt_id[0])) {
-        printf("smv %d joined memdom %d\n", tpt_id[0], mdom_id);        
+  attach_mem_view_to_mdom(mdom_id, mem_view_id[0]);
+    if (is_mem_view_attached(mdom_id, mem_view_id[0])) {
+        printf("smv %d joined memdom %d\n", mem_view_id[0], mdom_id);        
     }
 
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_READ);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
+    memdom_priv_add(mdom_id, mem_view_id[0], MEMDOM_READ);
+    privs = memdom_priv_get(mdom_id, mem_view_id[0]);
+    printf("smv %d privs %x memdom %d\n", mem_view_id[0], privs, mdom_id);
 
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_WRITE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
+    memdom_priv_add(mdom_id, mem_view_id[0], MEMDOM_WRITE);
+    privs = memdom_priv_get(mdom_id, mem_view_id[0]);
+    printf("smv %d privs %x memdom %d\n", mem_view_id[0], privs, mdom_id);
 
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_EXECUTE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
+    memdom_priv_add(mdom_id, mem_view_id[0], MEMDOM_EXECUTE);
+    privs = memdom_priv_get(mdom_id, mem_view_id[0]);
+    printf("smv %d privs %x memdom %d\n", mem_view_id[0], privs, mdom_id);
 
-    memdom_priv_add(mdom_id, tpt_id[0], MEMDOM_ALLOCATE);
-    privs = memdom_priv_get(mdom_id, tpt_id[0]);
-    printf("smv %d privs %x memdom %d\n", tpt_id[0], privs, mdom_id);
+    memdom_priv_add(mdom_id, mem_view_id[0], MEMDOM_ALLOCATE);
+    privs = memdom_priv_get(mdom_id, mem_view_id[0]);
+    printf("smv %d privs %x memdom %d\n", mem_view_id[0], privs, mdom_id);
 
 
     mdom_alloc[i] = (int*) memdom_alloc(mdom_id, 0x50);
@@ -113,12 +113,12 @@ int priv_test()
     printf("\n");
 
 
-    detach_tpt_from_mdom(mdom_id, tpt_id[0]);
+    detach_mem_view_from_mdom(mdom_id, mem_view_id[0]);
 
 
   for (i = 0; i < PER_THREAD_TPTS; i++) {
-        if (tpt_id[i] != -1) {
-            tpt_remove(tpt_id[i]);
+        if (mem_view_id[i] != -1) {
+            mem_view_remove(mem_view_id[i]);
         }
     }
 
@@ -134,7 +134,7 @@ int pthread_test(){
     int memdom_id[NUM_MEMDOMS_PER_THREAD];
     pthread_t tid[NUM_THREADS];
 
-    tpt_init(1);
+    mem_view_init(1);
 
     for (i = 0; i < NUM_THREADS; i++) {
         pthread_create(&tid[i], NULL, fn2, NULL);
@@ -176,45 +176,45 @@ void *fn3(void *args){
 int __main(){
     int i = 0;
     int memdom_id;
-    int tpt_id;
+    int mem_view_id;
     pthread_t tid;
     int privs;
     int rv=0;
-    tpt_init(0);
+    mem_view_init(0);
 
    // pthread_create(&tid, NULL, fn2, NULL);
     
 
    memdom_id = memdom_create();
 
-    tpt_id = tpt_create();
-    attach_tpt_to_mdom(0, tpt_id);
-    memdom_priv_add(0, tpt_id, MEMDOM_READ | MEMDOM_WRITE);
+    mem_view_id = mem_view_create();
+    attach_mem_view_to_mdom(0, mem_view_id);
+    memdom_priv_add(0, mem_view_id, MEMDOM_READ | MEMDOM_WRITE);
 
 
-    rv = sthread_create(tpt_id, &tid,fn3, NULL);
+    rv = coproc_create(mem_view_id, &tid,fn3, NULL);
     if (rv == -1) {
-            printf("sthread_create error\n");
+            printf("coproc_create error\n");
         }
 
 
 
-     attach_tpt_to_mdom(memdom_id, tpt_id);
+     attach_mem_view_to_mdom(memdom_id, mem_view_id);
 
-    memdom_priv_add(memdom_id, tpt_id, MEMDOM_READ);
-    privs = memdom_priv_get(memdom_id, tpt_id);
-    printf("tpt %d privs %x memdom %d\n", tpt_id, privs, memdom_id);
+    memdom_priv_add(memdom_id, mem_view_id, MEMDOM_READ);
+    privs = memdom_priv_get(memdom_id, mem_view_id);
+    printf("tpt %d privs %x memdom %d\n", mem_view_id, privs, memdom_id);
 
 
-    if (is_tpt_attached(memdom_id, tpt_id)) {
-        printf("tpt %d joined memdom %d\n", tpt_id, memdom_id);        
+    if (is_mem_view_attached(memdom_id, mem_view_id)) {
+        printf("tpt %d joined memdom %d\n", mem_view_id, memdom_id);        
     }
 
 
     pthread_join(tid, NULL);
 
 
-//tpt_remove(tpt_id);
+//mem_view_remove(mem_view_id);
 
     
 

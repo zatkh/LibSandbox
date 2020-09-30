@@ -1008,7 +1008,7 @@ void unload_elf_module(const char *name)
 
 typedef int (*main_func_t)(void);
 
-int run_elf_module(struct elf_module *m, const char *func)
+int coexec(struct elf_module *m, const char *func)
 {
     ElfW(Sym *) s = lookup_symbol_in_module(m, func);
     main_func_t fn;

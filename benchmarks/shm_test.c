@@ -31,13 +31,13 @@ void *fn(void *args){
 int main(){
     int i = 0;
     int rv = 0;
-    int tpt_id[NUM_THREADS];
+    int mem_view_id[NUM_THREADS];
     pthread_t tid[NUM_THREADS];
     int *t[NUM_THREADS];
     glob = 0;
     block_write = 13; // don't allow this tpt to write to global
 
-    tpt_init(1);
+    mem_view_init(1);
     
     pthread_mutex_init(&mlock, NULL);
 
@@ -47,18 +47,18 @@ int main(){
 
     // main thread create smvs
     for (i = 0; i < NUM_THREADS; i++) {
-        tpt_id[i] = tpt_create();
+        mem_view_id[i] = mem_view_create();
 
-        attach_tpt_to_mdom(mdom_id, tpt_id[i]);    
-        memdom_priv_add(mdom_id, tpt_id[i], MEMDOM_READ | MEMDOM_WRITE);
+        attach_mem_view_to_mdom(mdom_id, mem_view_id[i]);    
+        memdom_priv_add(mdom_id, mem_view_id[i], MEMDOM_READ | MEMDOM_WRITE);
 
     //attach global mdom to all tpts
-        attach_tpt_to_mdom(0, tpt_id[i]);
+        attach_mem_view_to_mdom(0, mem_view_id[i]);
     // Set privileges to global memdom
         if (block_write == i) {        
-            memdom_priv_add(0, tpt_id[i], MEMDOM_READ);
+            memdom_priv_add(0, mem_view_id[i], MEMDOM_READ);
         } else{
-            memdom_priv_add(0, tpt_id[i], MEMDOM_READ  | MEMDOM_WRITE);
+            memdom_priv_add(0, mem_view_id[i], MEMDOM_READ  | MEMDOM_WRITE);
         }
     }
 
@@ -66,7 +66,7 @@ int main(){
     for (i = 0; i < NUM_THREADS; i++) {
         t[i] = malloc(sizeof(int));
         *t[i] = i;
-        rv = sthread_create(tpt_id[i], &tid[i], fn, t[i]);
+        rv = coproc_create(mem_view_id[i], &tid[i], fn, t[i]);
         if (rv == -1) {
             printf("smvthread_create error\n");
         }
@@ -81,8 +81,8 @@ int main(){
 
 
     for (i = 0; i < NUM_THREADS; i++) {
-        if (tpt_id[i] != -1) {
-            tpt_remove(tpt_id[i]);
+        if (mem_view_id[i] != -1) {
+            mem_view_remove(mem_view_id[i]);
         }
     }
 
@@ -90,7 +90,7 @@ int main(){
     *dint = glob + 1 ;
     printf("Final glob: %d\n", glob);
     printf("Final dint: %d\n", *dint);
-    printf("smv 123 exists? %d\n", tpt_exists(123));
+    printf("smv 123 exists? %d\n", mem_view_exists(123));
 
    
 

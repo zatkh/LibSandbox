@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC  -Wall -fPIC -g  -shared -Wl,-soname,libmdom.so -o libmdom.so CMakeFiles/mdom.dir/mdom.c.o 

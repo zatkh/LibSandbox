@@ -1,0 +1,8 @@
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/rebuild_cache.dir
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/edit_cache.dir
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/mdom.dir
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/tpt_loader.dir
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/tpt.dir
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/kernel_api.dir
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/sbox.dir
+/home/zt/LibSandbox/intra_proc_sbox/CMakeFiles/loader.dir

@@ -16,7 +16,7 @@ pthread_mutex_t create_thread_mutex;
 int ALLOW_GLOBAL; // 1: all threads can access global memdom, 0 otherwise
 
 //called by main thread to mark the process as tpt-aware
-int tpt_init(int global) {
+int mem_view_init(int global) {
   int ret = -1;
   ALLOW_GLOBAL = 0;
 
@@ -35,94 +35,94 @@ int tpt_init(int global) {
   /* Decide whether we allow all threads to access global memdom */
   ALLOW_GLOBAL = global;
 
-  rlog("tpt_init(%d)\n", ALLOW_GLOBAL);
+  rlog("mem_view_init(%d)\n", ALLOW_GLOBAL);
   return ret;
 }
 
-int tpt_create(void) {
-  int tpt_id = -1;
-  tpt_id = message_to_kernel("smv,create");
-  if (tpt_id < 0) {
-    fprintf(stderr, "tpt_create() failed\n");
+int mem_view_create(void) {
+  int mem_view_id = -1;
+  mem_view_id = message_to_kernel("smv,create");
+  if (mem_view_id < 0) {
+    fprintf(stderr, "mem_view_create() failed\n");
     return -1;
   }
-  rlog("kernel responded smv id %d\n", tpt_id);
-  return tpt_id;
+  rlog("kernel responded smv id %d\n", mem_view_id);
+  return mem_view_id;
 }
 
-int tpt_remove(int tpt_id) {
+int mem_view_remove(int mem_view_id) {
   int ret = 0;
   char buf[100];
-  sprintf(buf, "smv,kill,%d", tpt_id);
+  sprintf(buf, "smv,kill,%d", mem_view_id);
   ret = message_to_kernel(buf);
   if (ret == -1) {
-    fprintf(stderr, "smv_kill(%d) failed\n", tpt_id);
+    fprintf(stderr, "smv_kill(%d) failed\n", mem_view_id);
     return -1;
   }
-  rlog("killed tpt ID= %d", tpt_id);
+  rlog("killed tpt ID= %d", mem_view_id);
   return ret;
 }
 
-int tpt_exists(int tpt_id) {
+int mem_view_exists(int mem_view_id) {
   int ret = 0;
   char buf[50];
-  sprintf(buf, "smv,exists,%d", tpt_id);
+  sprintf(buf, "smv,exists,%d", mem_view_id);
   ret = message_to_kernel(buf);
   if (ret == -1) {
-    fprintf(stderr, "tpt_exists(smv %d) failed\n", tpt_id);
+    fprintf(stderr, "mem_view_exists(smv %d) failed\n", mem_view_id);
     return -1;
   }
-  rlog("tpt ID %d exists? %d", tpt_id, ret);
+  rlog("tpt ID %d exists? %d", mem_view_id, ret);
   return ret;
 }
 
-int attach_tpt_to_mdom(int mdom_id, int tpt_id) {
+int attach_mem_view_to_mdom(int mdom_id, int mem_view_id) {
   int ret = 0;
   char buf[50];
-  sprintf(buf, "smv,domain,%d,join,%d", tpt_id, mdom_id);
+  sprintf(buf, "smv,domain,%d,join,%d", mem_view_id, mdom_id);
   ret = message_to_kernel(buf);
   if (ret == -1) {
-    fprintf(stderr, "smv_join_domain(smv %d, memdom %d) failed\n", tpt_id, mdom_id);
+    fprintf(stderr, "smv_join_domain(smv %d, memdom %d) failed\n", mem_view_id, mdom_id);
     return -1;
   }
-  rlog("tpt ID %d joined memdom ID %d", tpt_id, mdom_id);
+  rlog("tpt ID %d joined memdom ID %d", mem_view_id, mdom_id);
   return 0;
 }
 
-int detach_tpt_from_mdom(int mdom_id, int tpt_id) {
+int detach_mem_view_from_mdom(int mdom_id, int mem_view_id) {
   int ret = 0;
   char buf[100];
-  sprintf(buf, "smv,domain,%d,leave,%d", tpt_id, mdom_id);
+  sprintf(buf, "smv,domain,%d,leave,%d", mem_view_id, mdom_id);
   ret = message_to_kernel(buf);
   if (ret == -1) {
-    fprintf(stderr, "smv_leave_domain(smv %d, memdom %d) failed\n", tpt_id, mdom_id);
+    fprintf(stderr, "smv_leave_domain(smv %d, memdom %d) failed\n", mem_view_id, mdom_id);
     return -1;
   }
-  rlog("smv ID %d left memdom ID %d", tpt_id, mdom_id);
+  rlog("smv ID %d left memdom ID %d", mem_view_id, mdom_id);
   return ret;
 }
 
-int is_tpt_attached(int mdom_id, int tpt_id) {
+int is_mem_view_attached(int mdom_id, int mem_view_id) {
   int ret = 0;
   char buf[50];
-  sprintf(buf, "smv,domain,%d,isin,%d", tpt_id, mdom_id);
+  sprintf(buf, "smv,domain,%d,isin,%d", mem_view_id, mdom_id);
   ret = message_to_kernel(buf);
   if (ret == -1) {
-    fprintf(stderr, "is_tpt_attached(smv %d, memdom %d) failed\n", tpt_id, mdom_id);
+    fprintf(stderr, "is_mem_view_attached(smv %d, memdom %d) failed\n", mem_view_id, mdom_id);
     return -1;
   }
-  rlog("tpt ID %d in memdom ID %d?: %d", tpt_id, mdom_id, ret);
+  rlog("tpt ID %d in memdom ID %d?: %d", mem_view_id, mdom_id, ret);
   return ret;
 }
 
 /* 
  * Create an sthread running in a dedicated tpt.
- * if (tpt_id = -1), sthread_create creates a new tpt 
- * else if (tpt_id != -1) it launch a thread that will have tpt_id view of the memory
- * When no error, return the tpt_id that the new thread is running in. 
+ * if (mem_view_id = -1), coproc_create creates a new tpt 
+ * else if (mem_view_id != -1) it launch a thread that will have mem_view_id view of the memory
+ * When no error, return the mem_view_id that the new thread is running in. 
  * If we replaces it as pthread_create, return 0.
  */
-int sthread_create(int tpt_id, pthread_t* tid, void*(fn)(void*), void* args){
+int coproc_create(int mem_view_id, pthread_t* tid, void*(fn)(void*), void* args){
   int ret = 0;
   char buf[100];
   int mdom_id;
@@ -130,21 +130,21 @@ int sthread_create(int tpt_id, pthread_t* tid, void*(fn)(void*), void* args){
   void* stack_base;
   unsigned long stack_size;
 
-  if(tpt_id == -1){
-    tpt_id = tpt_create();
-    fprintf(stderr, "creating a new tpt %d for the new thread to run in\n", tpt_id);
+  if(mem_view_id == -1){
+    mem_view_id = mem_view_create();
+    fprintf(stderr, "creating a new tpt %d for the new thread to run in\n", mem_view_id);
   }
 
   // a thread can only work with valid tpts
-  if(!tpt_exists(tpt_id)){
-    fprintf(stderr, "thread cannot run in a non-existing tpt %d\n", tpt_id);
+  if(!mem_view_exists(mem_view_id)){
+    fprintf(stderr, "thread cannot run in a non-existing tpt %d\n", mem_view_id);
     return -1;
   }
 
 // global shared memory (mdom=0) is allowed with all privilages
   if(ALLOW_GLOBAL){
-    attach_tpt_to_mdom(0, tpt_id);
-    memdom_priv_add(0, tpt_id, MEMDOM_READ | MEMDOM_WRITE | MEMDOM_ALLOCATE | MEMDOM_EXECUTE);
+    attach_mem_view_to_mdom(0, mem_view_id);
+    memdom_priv_add(0, mem_view_id, MEMDOM_READ | MEMDOM_WRITE | MEMDOM_ALLOCATE | MEMDOM_EXECUTE);
   }
 
   
@@ -156,15 +156,15 @@ int sthread_create(int tpt_id, pthread_t* tid, void*(fn)(void*), void* args){
   
   mdom_id = memdom_create();
   if(mdom_id == -1){
-    fprintf(stderr, "failed to create thread local memdom for smv %d\n", tpt_id);
+    fprintf(stderr, "failed to create thread local memdom for smv %d\n", mem_view_id);
     pthread_mutex_unlock(& create_thread_mutex);
     return -1;
   }
-  attach_tpt_to_mdom(mdom_id, tpt_id);
-  memdom_priv_add(mdom_id, tpt_id, MEMDOM_READ | MEMDOM_WRITE | MEMDOM_ALLOCATE | MEMDOM_EXECUTE);
+  attach_mem_view_to_mdom(mdom_id, mem_view_id);
+  memdom_priv_add(mdom_id, mem_view_id, MEMDOM_READ | MEMDOM_WRITE | MEMDOM_ALLOCATE | MEMDOM_EXECUTE);
 
 // for parent to initalze the stack
-  attach_tpt_to_mdom(mdom_id, 0);
+  attach_mem_view_to_mdom(mdom_id, 0);
   memdom_priv_add(mdom_id, 0, MEMDOM_READ | MEMDOM_WRITE | MEMDOM_ALLOCATE | MEMDOM_EXECUTE);
 // setup the stack
   stack_size = PTHREAD_STACK_MIN + 0x8000;
@@ -185,10 +185,10 @@ int sthread_create(int tpt_id, pthread_t* tid, void*(fn)(void*), void* args){
 #endif // THREAD_PRIVATE_STACK
 
 // register the thread as an sthread with its own tpts
-  sprintf(buf, "smv,registerthread,%d", tpt_id);
+  sprintf(buf, "smv,registerthread,%d", mem_view_id);
   ret = message_to_kernel(buf);
   if(ret != 0){
-        fprintf(stderr, "register_smv_thread for smv %d failed\n", tpt_id);
+        fprintf(stderr, "register_smv_thread for smv %d failed\n", mem_view_id);
     pthread_mutex_unlock(& create_thread_mutex);
     return -1;
   }
@@ -200,26 +200,26 @@ int sthread_create(int tpt_id, pthread_t* tid, void*(fn)(void*), void* args){
 // already registerd it as sthread
   ret = pthread_create(tid, &attr, fn, args);
   if(ret){
-    fprintf(stderr, "pthread_create for smv %d failed\n", tpt_id);
+    fprintf(stderr, "pthread_create for smv %d failed\n", mem_view_id);
     pthread_mutex_unlock(& create_thread_mutex);
     return -1;
   }
-  fprintf(stderr, "smv %d is ready to run\n", tpt_id);
+  fprintf(stderr, "smv %d is ready to run\n", mem_view_id);
 
 #ifdef INTERCEPT_PTHREAD_CREATE
   /* Set return value to 0 to avoid pthread_create error */
-  tpt_id = 0;
-  /* ReDefine pthread_create to be sthread_create again */
-#define pthread_create(tid, attr, fn, args) sthread_create(-1, tid, fn, args)
+  mem_view_id = 0;
+  /* ReDefine pthread_create to be coproc_create again */
+#define pthread_create(tid, attr, fn, args) coproc_create(-1, tid, fn, args)
 #endif
 
 #ifdef THREAD_PRIVATE_STACK
 // detach the parent from the mdom
 
-  detach_tpt_from_mdom(mdom_id, 0);
+  detach_mem_view_from_mdom(mdom_id, 0);
 #endif
   pthread_mutex_unlock(& create_thread_mutex);
-  return tpt_id;
+  return mem_view_id;
 }
     
 

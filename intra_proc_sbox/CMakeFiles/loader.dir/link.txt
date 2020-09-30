@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -fPIC -g  -rdynamic CMakeFiles/loader.dir/loader.c.o CMakeFiles/loader.dir/main.c.o CMakeFiles/loader.dir/list.c.o  -o loader -Wl,-rpath,/home/zt/LibSandbox/intra_proc_sbox -ldl -pthread libsbox.so libtpt.so libmdom.so libkernel_api.so -lpthread 

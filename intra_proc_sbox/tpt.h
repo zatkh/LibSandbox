@@ -14,20 +14,20 @@
 #define __SOURCEFILE__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define rlog(format, ...) { \
     if( LOGGING ) { \
-        fprintf(stdout, "[tpt] " format, ##__VA_ARGS__); \
+        fprintf(stdout, "[mem_view] " format, ##__VA_ARGS__); \
         fflush(NULL);   \
     }\
 }
 
 
-// can allocate specific tpt for privae stack
+// can allocate specific mem_view for privae stack
 //#define THREAD_PRIVATE_STACK
 
 
 // Note: DONT intercept pthread for Firefox
 //#define INTERCEPT_PTHREAD_CREATE
 //#ifdef INTERCEPT_PTHREAD_CREATE
-//#define pthread_create(tid, attr, fn, args) sthread_create(-1, tid, fn, args)
+//#define pthread_create(tid, attr, fn, args) coproc_create(-1, tid, fn, args)
 //#endif
 
 extern int ALLOW_GLOBAL; // 1: all threads can access global memdom, 0 otherwise
@@ -37,28 +37,30 @@ extern "C" {
 #endif
 
 // Telling the kernel that this process will be using thread pagetables 
-int tpt_init(int);
+int mem_view_init(int);
 
-// create a new tpt and return its id
-int tpt_create(void);
+// create a new mem_view and return its id
+int mem_view_create(void);
 
-//cleanup a tpt and all its mdoms
-int tpt_remove(int tpt_id);
+//cleanup a mem_view and all its mdoms
+int mem_view_remove(int mem_view_id);
 
-// Check whether a tpt exists
-int tpt_exists(int tpt_id);
+// Check whether a mem_view exists
+int mem_view_exists(int mem_view_id);
 
-// attacj a tpt to a memory domain 
-int attach_tpt_to_mdom(int mdom_id, int tpt_id);
+// attacj a mem_view to a memory domain 
+int attach_mem_view_to_mdom(int mdom_id, int mem_view_id);
 
-// detach a tpt from memory domain 
-int detach_tpt_from_mdom(int mdom_id, int tpt_id);
+// detach a mem_view from memory domain 
+int detach_mem_view_from_mdom(int mdom_id, int mem_view_id);
 
-// Check if tpt is attached toa mdom
-int is_tpt_attached(int mdom_id, int tpt_id);
+// Check if mem_view is attached toa mdom
+int is_mem_view_attached(int mdom_id, int mem_view_id);
 
-// Create an sthread with dedicated tpt 
-int sthread_create(int tpt_id, pthread_t *tid, void *(fn)(void*), void *args);
+// Create an pthread-based coproc with dedicated mem_view 
+// or use clone with CLONE_MEM_VIEW flag directly
+
+int coproc_create(int mem_view_id, pthread_t *tid, void *(fn)(void*), void *args);
 
 
 

@@ -91,16 +91,16 @@ void *memdom_alloc(int memdom_id, unsigned long nbytes);
 void memdom_free(void* data);
 
 /* Return privilege status of tpt rib in memory domain memdom */
-unsigned long memdom_priv_get(int memdom_id, int tpt_id);
+unsigned long memdom_priv_get(int memdom_id, int mem_view_id);
 
 /* Add privilege of tpt rib in memory domain memdom */
-int memdom_priv_add(int memdom_id, int tpt_id, unsigned long privs);
+int memdom_priv_add(int memdom_id, int mem_view_id, unsigned long privs);
 
 /* Delete privilege of tpt rib in memory domain memdom */
-int memdom_priv_del(int memdom_id, int tpt_id, unsigned long privs);
+int memdom_priv_del(int memdom_id, int mem_view_id, unsigned long privs);
 
 /* Modify privilege of tpt rib in memory domain memdom */
-int memdom_priv_mod(int memdom_id, int tpt_id, unsigned long privs);
+int memdom_priv_mod(int memdom_id, int mem_view_id, unsigned long privs);
 
 /* Get the memdom id for global memory used by main thread */
 int memdom_main_id(void);

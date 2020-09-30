@@ -85,24 +85,24 @@ int main(int argc, char *argv[])
     }
 
 #ifdef COPROC_ENABLED
-     tpt_init(1);
+     mem_view_init(1);
     elf_mdom=memdom_create();
-    int tpt_id=tpt_create();
+    int mem_view_id=mem_view_create();
 
 
-    printf("mdom created for loader: %d, tpt created: %d, mdom_id: %d\n",elf_mdom,tpt_id);
+    printf("mdom created for loader: %d, tpt created: %d, mdom_id: %d\n",elf_mdom,mem_view_id);
 
-    attach_tpt_to_mdom(elf_mdom, tpt_id);
-     attach_tpt_to_mdom(elf_mdom, 0);
-    if (is_tpt_attached(elf_mdom, tpt_id)) {
-        printf("smv %d joined memdom %d\n", tpt_id, elf_mdom);        
+    attach_mem_view_to_mdom(elf_mdom, mem_view_id);
+     attach_mem_view_to_mdom(elf_mdom, 0);
+    if (is_mem_view_attached(elf_mdom, mem_view_id)) {
+        printf("smv %d joined memdom %d\n", mem_view_id, elf_mdom);        
     }
 
-    memdom_priv_add(elf_mdom, tpt_id, MEMDOM_READ| MEMDOM_WRITE| MEMDOM_EXECUTE | MEMDOM_ALLOCATE);
+    memdom_priv_add(elf_mdom, mem_view_id, MEMDOM_READ| MEMDOM_WRITE| MEMDOM_EXECUTE | MEMDOM_ALLOCATE);
         memdom_priv_add(elf_mdom, 0, MEMDOM_READ| MEMDOM_WRITE| MEMDOM_EXECUTE | MEMDOM_ALLOCATE);
 
-   int  privs = memdom_priv_get(elf_mdom, tpt_id);
-    printf("smv %d privs %x memdom %d\n", tpt_id, privs, elf_mdom);
+   int  privs = memdom_priv_get(elf_mdom, mem_view_id);
+    printf("smv %d privs %x memdom %d\n", mem_view_id, privs, elf_mdom);
 
 #endif
 
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
     free(bin);
 
-    run_elf_module(m, argv[2]);
+    coexec(m, argv[2]);
 
     LOG_INFO("module %s run done", m->name);
 

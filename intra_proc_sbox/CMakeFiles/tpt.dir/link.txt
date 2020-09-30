@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC  -Wall -fPIC -g  -shared -Wl,-soname,libtpt.so -o libtpt.so CMakeFiles/tpt.dir/tpt.c.o 
