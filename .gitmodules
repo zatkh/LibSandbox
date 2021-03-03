@@ -1,3 +1,9 @@
 [submodule "benchmarks/apps/zlib"]
 	path = benchmarks/apps/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "intra_proc_sbox/TDC"]
+	path = intra_proc_sbox/TDC
+	url = git@github.com:zatkh/TDC.git
+[submodule "intra_proc_sbox/uthrd"]
+	path = intra_proc_sbox/uthrd
+	url = git@github.com:zatkh/uthrd.git
